@@ -21,16 +21,14 @@ const SetupAvailability = (props: ISetupAvailabilityProps) => {
   const { t } = useLocale();
   const { nextStep } = props;
 
+  // Made this usage unconditional to resolve the error that occurs while testing the user onboarding locally
   const router = useRouter();
-  let queryAvailability;
-  if (defaultScheduleId) {
-    queryAvailability = trpc.viewer.availability.schedule.get.useQuery(
-      { scheduleId: defaultScheduleId },
+  const queryAvailability = trpc.viewer.availability.schedule.get.useQuery(
+      { scheduleId: defaultScheduleId ?? undefined },
       {
-        enabled: router.isReady,
+        enabled: defaultScheduleId != null && router.isReady,
       }
     );
-  }
 
   const availabilityForm = useForm({
     defaultValues: {

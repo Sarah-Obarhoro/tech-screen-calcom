@@ -1,13 +1,17 @@
 import type { FC } from "react";
+import { useState } from "react";
 import type { SubmitHandler } from "react-hook-form";
 import { FormProvider } from "react-hook-form";
 import { useForm, useFormContext } from "react-hook-form";
+
+
 
 import type { EventNameObjectType } from "@calcom/core/event";
 import { getEventName } from "@calcom/core/event";
 import { validateCustomEventName } from "@calcom/core/event";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { Button, Dialog, DialogClose, DialogFooter, DialogContent, TextField } from "@calcom/ui";
+
 
 interface FormValues {
   customEventName: string;
@@ -34,6 +38,16 @@ const CustomEventTypeModalForm: FC<CustomEventTypeModalFormProps> = (props) => {
   const previewText = getEventName({ ...event, eventName: watch("customEventName") });
   const placeHolder_ = watch("customEventName") === "" ? previewText : placeHolder;
 
+  // Created a function to stop the enter key from submitting the form if the user is not focused on the send button
+  const [customEventName, setCustomEventName] = useState("");
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      setCustomEventName((prevValue) => prevValue + "\n");
+    }
+  };
+
   return (
     <form
       id="custom-event-name"
@@ -55,6 +69,9 @@ const CustomEventTypeModalForm: FC<CustomEventTypeModalFormProps> = (props) => {
           validate: (value) =>
             validateCustomEventName(value, t("invalid_event_name_variables"), event.bookingFields),
         })}
+        value={customEventName}
+        onChange={(event) => setCustomEventName(event.target.value)}
+        onKeyDown={handleKeyDown}
         className="mb-0"
       />
       <div className="pt-6 text-sm">
